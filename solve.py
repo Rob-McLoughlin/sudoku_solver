@@ -9,18 +9,6 @@ puzzle = [[5, 1, 0, 0, 7, 9, 0, 0, 0],
           [0, 0, 0, 4, 9, 0, 0, 6, 1]]
 
 
-def next_cell(puzzle, i, j):
-    for x in range(i, 9):
-        for y in range(j, 9):
-            if puzzle[x][y] == 0:
-                return x, y
-    for x in range(0, 9):
-        for y in range(0, 9):
-            if puzzle[x][y] == 0:
-                return x, y
-    return -1, -1
-
-
 def get_subgrid(puzzle: list, x: int, y: int) -> list:
     """Return a flat list of the subgrid that an x, y sits in the puzzle grid
 
@@ -58,7 +46,7 @@ def possible(puzzle: list, x: int, y: int, n: int) -> bool:
     """
     # print('Trying {} at position {} {}'.format(n, x, y))
     # Check the row, check the column
-    row = [puzzle[y]]
+    row = puzzle[y]
     column = [number[x] for number in puzzle]
     # If the number is in the column or in the row, return False
     if n in row or n in column:
@@ -72,45 +60,32 @@ def possible(puzzle: list, x: int, y: int, n: int) -> bool:
     return True
 
 
-def solve_puzzle(puzzle: list) -> list:
-    """Solves the given puzzle
-
-    Args:
-        puzzle (list): A 2x9 matrix representing the puzzle
-
-    Returns:
-        list: the solved puzzle (with no 0's)
-    """
-    for y in range(9):
-        # print(y)
-        for x in range(9):
-            if puzzle[y][x] == 0:
-                print('Found 0 position at {},{}'.format(x, y))
-                for n in range(1, 10):
-                    if possible(puzzle=puzzle, x=x, y=y, n=n):
-                        print('{} fits at position {}, {}'.format(n, x, y))
-                        puzzle[y][x] = n
-                        solve_puzzle(puzzle=puzzle)
-                        puzzle[y][x] = 0
-                return
+def get_possibilities(puzzle: list, x: int, y: int) -> list:
+    possibilities = [i for i in range(1, 10) if possible(
+        puzzle=puzzle, x=x, y=y, n=i)]
+    return possibilities
 
 
-# print(solve_puzzle(puzzle=puzzle))
-
-
-def solve(puzzle, i=0, j=0):
-    i, j = next_cell(puzzle, i, j)
-    if i == -1:
-        return True
-    for e in range(1, 10):
-        if possible(puzzle=puzzle, x=i, y=j, n=e):
-            puzzle[i][j] = e
-            if solve(puzzle, i, j):
-                return True
-            # Undo the current cell for backtracking
-            puzzle[i][j] = 0
-    print(puzzle)
-    return False
+def solve(puzzle):
+    finished = True if 0 not in [
+        item for row in puzzle for item in row] else False
+    if finished:
+        print('Finished the puzzle!')
+        print(puzzle)
+    else:
+        # Create a list of possibilities for each cell
+        for row in puzzle:
+            row_number = puzzle.index(row)
+            # print(row_number)
+            for i in range(9):
+                if row[i] == 0:
+                    # Create possibilities)
+                    possibilities = get_possibilities(
+                        puzzle=puzzle, x=i, y=row_number)
+                    if len(possibilities) == 1:
+                        puzzle[row_number][i] = possibilities[0]
+                        # Go again
+                        solve(puzzle)
 
 
 solve(puzzle=puzzle)
